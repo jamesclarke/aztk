@@ -135,6 +135,7 @@ class ApplicationConfiguration:
             driver_cores=None,
             executor_cores=None,
             max_retry_count=None,
+            depends_on=None,
     ):
         self.name = name
         self.application = application
@@ -151,6 +152,7 @@ class ApplicationConfiguration:
         self.driver_cores = driver_cores
         self.executor_cores = executor_cores
         self.max_retry_count = max_retry_count
+        self.depends_on = depends_on
 
 
 class ApplicationState(Enum):

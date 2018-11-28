@@ -98,6 +98,7 @@ def generate_application_task(core_base_operations, container_id, application, r
         user_identity=batch_models.UserIdentity(
             auto_user=batch_models.AutoUserSpecification(
                 scope=batch_models.AutoUserScope.task, elevation_level=batch_models.ElevationLevel.admin)),
+        depends_on=application.depends_on,
     )
 
     return task

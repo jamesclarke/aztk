@@ -63,7 +63,11 @@ def create_pool_and_job_and_table(
     helpers.create_pool_if_not_exist(pool, core_cluster_operations.batch_client)
 
     # Create job
-    job = batch_models.JobAddParameter(id=job_id, pool_info=batch_models.PoolInformation(pool_id=pool_id))
+    job = batch_models.JobAddParameter(
+        id=job_id,
+        pool_info=batch_models.PoolInformation(pool_id=pool_id),
+        uses_task_depenendencies=True,
+    )
 
     # Add job to batch
     core_cluster_operations.batch_client.job.add(job)
