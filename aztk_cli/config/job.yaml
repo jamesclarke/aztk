@@ -40,10 +40,20 @@ job:
         main_class:
         jars:
           -
+        packages:
+          -
+        exclude_packages:
+          -
+        repositories:
+          -
         py_files:
           -
         files:
           -
+        conf: # extra spark config options
+          # key1: value1
+          # key2: value2
+        properties_file:
         driver_java_options:
         driver_library_path:
         driver_class_path:
@@ -59,10 +69,20 @@ job:
         main_class:
         jars:
           -
+        packages:
+          -
+        exclude_packages:
+          -
+        repositories:
+          -
         py_files:
           -
         files:
           -
+        conf: # extra spark config options
+          # key1: value1
+          # key2: value2
+        properties_file:
         driver_java_options:
         driver_library_path:
         driver_class_path:

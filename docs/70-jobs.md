@@ -20,10 +20,20 @@ Each Job has one or more applications given as a List in Job.yaml. Applications 
       main_class:
       jars:
         -
+      packages:
+        -
+      exclude_packages:
+        -
+      repositories:
+        -
       py_files:
         -
       files:
         -
+      conf:
+        # key1: value1
+        # key2: value2
+      properties_file:
       driver_java_options:
         -
       driver_library_path:

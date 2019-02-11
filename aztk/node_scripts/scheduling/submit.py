@@ -33,8 +33,16 @@ def __app_submit_cmd(application):
     spark_submit_cmd.add_option("--name", application.name)
     spark_submit_cmd.add_option("--class", application.main_class)
     spark_submit_cmd.add_option("--jars", jars and ",".join(jars))
+    spark_submit_cmd.add_option("--packages", application.packages and '"{}"'.format(",".join(application.packages)))
+    spark_submit_cmd.add_option("--exclude-packages", application.exclude_packages
+                                and '"{}"'.format(",".join(application.exclude_packages)))
+    spark_submit_cmd.add_option("--repositories", application.repositories
+                                and '"{}"'.format(",".join(application.repositories)))
     spark_submit_cmd.add_option("--py-files", py_files and ",".join(py_files))
     spark_submit_cmd.add_option("--files", files and ",".join(files))
+    for key, val in application.conf.items():
+        spark_submit_cmd.add_option("--conf", '"{key}={val}"'.format(key=key, val=val))
+    spark_submit_cmd.add_option("--properties-file", application.properties_file)
     spark_submit_cmd.add_option("--driver-java-options", application.driver_java_options)
     spark_submit_cmd.add_option("--driver-library-path", application.driver_library_path)
     spark_submit_cmd.add_option("--driver-class-path", application.driver_class_path)

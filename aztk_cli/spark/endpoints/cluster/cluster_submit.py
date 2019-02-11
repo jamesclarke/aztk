@@ -7,6 +7,15 @@ import aztk.spark
 from aztk_cli import config, log, utils
 
 
+class AppendToDict(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        key_vals = getattr(namespace, self.dest) or {}
+        for key_val_str in values.replace(" ", "").split(","):
+            key, val = key_val_str.split("=")
+            key_vals[key] = val
+        setattr(namespace, self.dest, key_vals)
+
+
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument("--id", dest="cluster_id", required=True, help="The unique id of your spark cluster")
 
@@ -26,6 +35,32 @@ def setup_parser(parser: argparse.ArgumentParser):
     )
 
     parser.add_argument(
+        "--packages",
+        help="Comma-separated list of maven coordinates of \
+                              jars to include on the driver and executor \
+                              classpaths. Will search the local maven repo, \
+                              then maven central and any additional remote \
+                              repositories given by --repositories. The \
+                              format for the coordinates should be \
+                              groupId:artifactId:version.",
+    )
+
+    parser.add_argument(
+        "--exclude-packages",
+        help="Comma-separated list of groupId:artifactId, to \
+                              exclude while resolving the dependencies \
+                              provided in --packages to avoid dependency \
+                              conflicts.",
+    )
+
+    parser.add_argument(
+        "--repositories",
+        help="Comma-separated list of additional remote \
+                              repositories to search for the maven \
+                              coordinates given with --packages.",
+    )
+
+    parser.add_argument(
         "--py-files",
         help="Comma-separated list of .zip, .egg, or .py files \
                               to place on the PYTHONPATH for Python apps. Use \
@@ -37,6 +72,24 @@ def setup_parser(parser: argparse.ArgumentParser):
         help="Comma-separated list of .zip, .egg, or .py files \
                               to place on the PYTHONPATH for Python apps. Use \
                               absolute path ot reference files.",
+    )
+
+    parser.add_argument(
+        "--conf",
+        action=AppendToDict,
+        metavar='"PROP1=VAL1[,PROP2=VAL2...]"',
+        help='Arbitrary Spark configuration property(/-ies). \
+                              Multiple --conf options can be added, either \
+                              by using multiple --conf flags or by supplying \
+                              a comma-separated list. All "PROP=VAL,..." \
+                              arguments should be wrapped in double quotes.',
+    )
+
+    parser.add_argument(
+        "--properties-file",
+        help="Path to a file from which to load extra \
+                              properties. If not specified, this will look \
+                              for conf/spark-defaults.conf.",
     )
 
     parser.add_argument("--driver-java-options", help="Extra Java options to pass to the driver.")
@@ -105,6 +158,9 @@ def execute(args: typing.NamedTuple):
 
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
     jars = []
+    packages = []
+    exclude_packages = []
+    repositories = []
     py_files = []
     files = []
 
@@ -117,6 +173,15 @@ def execute(args: typing.NamedTuple):
     if args.files is not None:
         files = args.files.replace(" ", "").split(",")
 
+    if args.packages is not None:
+        packages = args.packages.replace(" ", "").split(",")
+
+    if args.exclude_packages is not None:
+        exclude_packages = args.exclude_packages.replace(" ", "").split(",")
+
+    if args.repositories is not None:
+        repositories = args.repositories.replace(" ", "").split(",")
+
     log_application(args, jars, py_files, files)
 
     spark_client.cluster.submit(
@@ -127,8 +192,13 @@ def execute(args: typing.NamedTuple):
             application_args=args.app_args,
             main_class=args.main_class,
             jars=jars,
+            packages=packages,
+            exclude_packages=exclude_packages,
+            repositories=repositories,
             py_files=py_files,
             files=files,
+            conf=args.conf,
+            properties_file=args.properties_file,
             driver_java_options=args.driver_java_options,
             driver_library_path=args.driver_library_path,
             driver_class_path=args.driver_class_path,
